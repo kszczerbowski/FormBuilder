@@ -1,0 +1,31 @@
+.container {
+  max-width: 1200px;
+  border: 1px solid black;
+  text-align: center;
+  margin: 0px auto;
+}
+
+.form-builder {
+  display: inline-block;
+  text-align: left;
+}
+
+.primary-question-button {
+  display: block;
+  margin: 0px auto;
+}
+
+.primary-box,
+.followup-box {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.generate-button {
+  display: block;
+  margin: 5px auto;
+}
+
+.hidden {
+  display: none;
+}
