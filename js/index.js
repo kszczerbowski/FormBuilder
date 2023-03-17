@@ -1,24 +1,28 @@
-import {
-  primaryQuestionMarkup,
-  followupQuestionMarkup,
-  questionMarkup,
-} from "./markup.js";
+import { questionMarkup } from "./markup.js";
 import {
   goToFormBuildersLastDiv,
   goToLastSibling,
+  goToFollowupQuestionButton,
+  goToNestedArray
 } from "./navigateFunctions.js";
 import {
-  shouldAddPrimaryQuestion,
   isPrimaryQuestion,
   getNestingDegree,
   prepareEmptyFollowupBox,
   prepareEmptyPrimaryBox,
+  getQuestionProperties,
+  blockQuestionButtons,
+  unblockQuestionButtons,
+  getCoordinates
 } from "./supportFunctions.js";
 
 const formBuilder = document.querySelector(".form-builder");
+const primaryQuestionButton = document.querySelector(
+  ".primary-question-button"
+);
 const generateButton = document.querySelector(".generate-button");
 const targetForm = document.querySelector(".generated-form");
-const formTree = {};
+const formTree = [];
 let numberOfPrimaryQuestion = 0;
 
 function handleAddPrimaryQuestion(event) {
@@ -30,6 +34,7 @@ function handleAddPrimaryQuestion(event) {
   );
   prepareEmptyFollowupBox(lastPrimaryQuestionDiv, "beforeend");
   prepareEmptyPrimaryBox(lastPrimaryQuestionDiv, "afterend");
+  blockQuestionButtons();
 }
 
 function handleAddFollowupQuestion(event) {
@@ -37,20 +42,39 @@ function handleAddFollowupQuestion(event) {
   followupQuestionDiv.insertAdjacentHTML("afterbegin", questionMarkup(event));
   prepareEmptyFollowupBox(followupQuestionDiv, "beforeend");
   prepareEmptyFollowupBox(followupQuestionDiv, "afterend");
+  blockQuestionButtons();
 }
 
 function handleSaveQuestion(event) {
-  // formTree['primaryQuestion'+numberOfPrimaryQuestion] = {
-  //     question: '',
-  //     type: '',
-  //     followups: []
-  // }
-  // console.log('form tree: ', formTree)
-  console.log(isPrimaryQuestion(event.target));
+  const followupQuestionButton = goToFollowupQuestionButton(event.target);
+  if (isPrimaryQuestion(event.target)) {
+    const [question, type] = getQuestionProperties(event.target);
+    formTree.push({
+      question: question,
+      type: type,
+      followups: [],
+    });
+  } else {
+    const [condition, question, type] = getQuestionProperties(event.target);
+    console.log("condition: ", condition);
+    console.log("question: ", question);
+    console.log("type: ", type);
+    const coordinates = getCoordinates(event.target)
+    const nestedArray = goToNestedArray(coordinates,formTree)
+    nestedArray.push({
+      condition: condition,
+      question: question,
+      type: type,
+      followups: [],
+    });
+  }
+  unblockQuestionButtons();
+  event.target.classList.add("hidden");
 }
 
 function generateForm() {
   console.log("generate form so much");
+  console.log('form tree: ', formTree)
 }
 
 formBuilder.addEventListener("click", (event) => {
@@ -65,10 +89,6 @@ formBuilder.addEventListener("click", (event) => {
       break;
     case "followup-question-button":
       handleAddFollowupQuestion(event);
-      const followupDivs = document.querySelectorAll(".followup-box");
-      followupDivs.forEach(
-        (div) => (div.style.marginLeft = `${getNestingDegree(div) * 40}px`)
-      );
       break;
     case "generate-button":
       generateForm();
@@ -77,3 +97,34 @@ formBuilder.addEventListener("click", (event) => {
       return;
   }
 });
+
+// const arrayOfObjects = [{
+//   question: question,
+//   type: type,
+//   followups: [],
+// },{
+//   question: question,
+//   type: type,
+//   followups: [
+//     {
+//       condition: condition,
+//       question: question,
+//       type: type,
+//       followups: [],
+//     },
+//     {
+//       condition: condition,
+//       question: question,
+//       type: type,
+//       followups: [],
+//     }
+//   ],
+// },{
+//   question: question,
+//   type: type,
+//   followups: [],
+// },{
+//   question: question,
+//   type: type,
+//   followups: [],
+// }]
