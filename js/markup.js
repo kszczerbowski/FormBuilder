@@ -31,8 +31,8 @@ export function questionMarkup(event) {
     const questionType = getQuestionType(event.target);
     const numberOptions =
       questionType === "number"
-        ? ` <option value=">">Greater than</option>
-    <option value="<">Less than</option>`
+        ? ` <option value="greater">Greater than</option>
+    <option value="smaller">Less than</option>`
         : null;
     const conditionInput =
       questionType === "radio"
@@ -46,7 +46,7 @@ export function questionMarkup(event) {
       `
   <label for="condition">Condition</label>
   <select name="condition-type" id="condition-type">
-    <option value="=">Equals</option>` +
+    <option value="===">Equals</option>` +
       numberOptions +
       `</select>` +
       conditionInput +
@@ -55,8 +55,32 @@ export function questionMarkup(event) {
   }
 }
 
-// export function questionMarkup(event) {
-//   return shouldAddPrimaryQuestion(event)
-//     ? primaryQuestionMarkup
-//     : followupQuestionMarkup;
-// }
+export function generatePrimaryQuestion(primaryQuestion, index, markupArray) {
+  let labelMarkup = ''
+    if (primaryQuestion.type === 'radio') {
+      labelMarkup = `<label class="form-question" for='primaryQuestion${index+1}y'>${primaryQuestion.question}</label>
+      <input type="radio" name='primaryQuestion${index+1}' id='primaryQuestion${index+1}y' value="yes">
+      Yes
+    <label for='primaryQuestion${index+1}n'></label>
+      <input type="radio" name='primaryQuestion${index+1}' id='primaryQuestion${index+1}n' value="no">
+      No`
+    } else {
+      labelMarkup = `<label for="primaryQuestion${index+1}" class="form-question">${primaryQuestion.question}</label><input class="form-input" name='primaryQuestion${index+1}' id='primaryQuestion${index+1}' type=${primaryQuestion.type}/>`
+    }
+    markupArray.push(labelMarkup)
+}
+
+export function generateFollowupQuestion(followupQuestion, index, markupArray){
+  let labelMarkup = ''
+  if (followupQuestion.type === 'radio') {
+    labelMarkup = `<label data-condition=${JSON.stringify(followupQuestion.condition)} class="form-question hidden" for='followupQuestion${index+1}y'>${followupQuestion.question}</label>
+    <input data-condition=${JSON.stringify(followupQuestion.condition)} class="hidden" type="radio" name='followupQuestion${index+1}' id='followupQuestion${index+1}y' value="yes">
+    <span data-condition=${JSON.stringify(followupQuestion.condition)} class="hidden">Yes</span>
+  <label data-condition=${JSON.stringify(followupQuestion.condition)} for='followupQuestion${index+1}n'></label>
+    <input data-condition=${JSON.stringify(followupQuestion.condition)} class="hidden" type="radio" name='followupQuestion${index+1}' id='followupQuestion${index+1}n' value="no">
+    <span data-condition=${JSON.stringify(followupQuestion.condition)} class="hidden">No</span>`
+  } else {
+    labelMarkup = `<label data-condition=${JSON.stringify(followupQuestion.condition)} for="followupQuestion${index+1}" class="form-question hidden">${followupQuestion.question}</label><input data-condition=${JSON.stringify(followupQuestion.condition)} class="form-input hidden" name='followupQuestion${index+1}' id='followupQuestion${index+1}' type=${followupQuestion.type}/>`
+  }
+  markupArray.push(labelMarkup)
+}

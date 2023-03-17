@@ -1,3 +1,5 @@
+import { generateFollowupQuestion, generatePrimaryQuestion } from "./markup.js";
+
 export function shouldAddPrimaryQuestion(event) {
   return event.target.parentNode.classList.contains("form-builder");
 }
@@ -53,9 +55,9 @@ export function getQuestionProperties(targetElement) {
     const conditionType = parent.querySelector("#condition-type").value;
     const conditionValue = parent.querySelector("#condition").value;
     const condition = {
-      parentQuestion: parentQuestion,
+      parentQuestion: parentQuestion.split(' ').join('%^&'),
       conditionType: conditionType,
-      conditionValue: conditionValue,
+      conditionValue: conditionValue.split(' ').join('%^&'),
     };
     return [condition, question, type];
   } else {
@@ -94,4 +96,43 @@ export function getCoordinates(targetElement) {
   coordinates.unshift(coordinate);
   // console.log('coordinates: ',coordinates)
   return coordinates;
+}
+
+export function generateQuestions(formTree, markupArray) {
+formTree.forEach((question, index) => {
+  if (question.nestingDegree !== undefined) {
+    generatePrimaryQuestion(question, index, markupArray)
+  } else {
+    generateFollowupQuestion(question, index, markupArray)
+  }
+  if (question.followups.length > 0) {
+    generateQuestions(question.followups, markupArray)
+  }
+})
+}
+
+export function unhideFollowups(targetElement, formElements) {
+  const labelSibling = targetElement.previousElementSibling
+  const labelQuestion = labelSibling.textContent
+  const currentAnswer = targetElement.value
+  for (let i=0; i<formElements.length; i++) {
+    if (formElements[i].dataset.condition !== undefined) {
+      let {parentQuestion, conditionType, conditionValue} = JSON.parse(formElements[i].dataset.condition)
+      parentQuestion = parentQuestion.split('%^&').join(' ')
+      conditionValue = conditionValue.split('%^&').join(' ')
+      if (parentQuestion === labelQuestion) {
+        switch (conditionType) {
+          case '===':
+            if (conditionValue === currentAnswer) formElements[i].classList.remove('hidden')
+          break;
+          case 'greater':
+            if (conditionValue < currentAnswer) formElements[i].classList.remove('hidden')
+          break;
+          case 'smaller':
+            if (conditionValue > currentAnswer) formElements[i].classList.remove('hidden')
+          break;
+        }
+      }
+    }
+  }
 }

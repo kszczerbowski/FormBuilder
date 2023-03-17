@@ -1,4 +1,4 @@
-import { questionMarkup } from "./markup.js";
+import { questionMarkup, generatePrimaryQuestion, generateFollowupQuestion} from "./markup.js";
 import {
   goToFormBuildersLastDiv,
   goToLastSibling,
@@ -13,7 +13,9 @@ import {
   getQuestionProperties,
   blockQuestionButtons,
   unblockQuestionButtons,
-  getCoordinates
+  getCoordinates,
+  generateQuestions,
+  unhideFollowups
 } from "./supportFunctions.js";
 
 const formBuilder = document.querySelector(".form-builder");
@@ -22,7 +24,9 @@ const primaryQuestionButton = document.querySelector(
 );
 const generateButton = document.querySelector(".generate-button");
 const targetForm = document.querySelector(".generated-form");
+let formElements = []
 const formTree = [];
+const formMarkupArray = []
 let numberOfPrimaryQuestion = 0;
 
 function handleAddPrimaryQuestion(event) {
@@ -53,13 +57,13 @@ function handleSaveQuestion(event) {
       question: question,
       type: type,
       followups: [],
+      nestingDegree: 0
     });
   } else {
     const [condition, question, type] = getQuestionProperties(event.target);
-    console.log("condition: ", condition);
-    console.log("question: ", question);
-    console.log("type: ", type);
     const coordinates = getCoordinates(event.target)
+    const primaryQuestion = formTree[coordinates[0]]
+    if (coordinates.length > primaryQuestion.nestingDegree) primaryQuestion.nestingDegree = coordinates.length
     const nestedArray = goToNestedArray(coordinates,formTree)
     nestedArray.push({
       condition: condition,
@@ -73,8 +77,12 @@ function handleSaveQuestion(event) {
 }
 
 function generateForm() {
-  console.log("generate form so much");
+generateQuestions(formTree, formMarkupArray)
+const formMarkup = formMarkupArray.join('')
+targetForm.innerHTML = formMarkup
+formElements = targetForm.children
   console.log('form tree: ', formTree)
+  console.log('children: ', formElements)
 }
 
 formBuilder.addEventListener("click", (event) => {
@@ -97,6 +105,11 @@ formBuilder.addEventListener("click", (event) => {
       return;
   }
 });
+
+targetForm.addEventListener('input', (event) => {
+  if (event.target.nodeName !== "INPUT") return
+  unhideFollowups(event.target, formElements)
+})
 
 // const arrayOfObjects = [{
 //   question: question,
