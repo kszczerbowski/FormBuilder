@@ -1,4 +1,7 @@
 import { generateFollowupQuestion, generatePrimaryQuestion } from "./markup.js";
+import { goToNestedArray } from "./navigateFunctions.js";
+import { handleSaveQuestion } from "./index.js";
+import { formTree } from "./index.js";
 
 export function shouldAddPrimaryQuestion(event) {
   return event.target.parentNode.classList.contains("form-builder");
@@ -6,6 +9,11 @@ export function shouldAddPrimaryQuestion(event) {
 
 export function isPrimaryQuestion(targetElement) {
   return targetElement.parentNode.classList.contains("primary-box");
+}
+
+function getBoxType(targetElement) {
+  if (targetElement.classList.contains("primary-box")) return "primary";
+  if (targetElement.classList.contains("followup-box")) return "followup";
 }
 
 export function getQuestionType(targetELement) {
@@ -55,9 +63,9 @@ export function getQuestionProperties(targetElement) {
     const conditionType = parent.querySelector("#condition-type").value;
     const conditionValue = parent.querySelector("#condition").value;
     const condition = {
-      parentQuestion: parentQuestion.split(' ').join('%^&'),
+      parentQuestion: parentQuestion.split(" ").join("%^&"),
       conditionType: conditionType,
-      conditionValue: conditionValue.split(' ').join('%^&'),
+      conditionValue: conditionValue.split(" ").join("%^&"),
     };
     return [condition, question, type];
   } else {
@@ -98,39 +106,86 @@ export function getCoordinates(targetElement) {
   return coordinates;
 }
 
-export function generateQuestions(formTree, markupArray) {
-formTree.forEach((question, index) => {
-  if (question.nestingDegree !== undefined) {
-    generatePrimaryQuestion(question, index, markupArray)
+function addQuestionToTree(targetElement) {
+  if (isPrimaryQuestion(targetElement)) {
+    const [question, type] = getQuestionProperties(targetElement);
+    formTree.push({
+      question: question,
+      type: type,
+      followups: [],
+      nestingDegree: 0,
+    });
   } else {
-    generateFollowupQuestion(question, index, markupArray)
+    const [condition, question, type] = getQuestionProperties(targetElement);
+    const coordinates = getCoordinates(targetElement);
+    const primaryQuestion = formTree[coordinates[0]];
+    if (coordinates.length > primaryQuestion.nestingDegree)
+      primaryQuestion.nestingDegree = coordinates.length;
+    const nestedArray = goToNestedArray(coordinates, formTree);
+    nestedArray.push({
+      condition: condition,
+      question: question,
+      type: type,
+      followups: [],
+    });
   }
-  if (question.followups.length > 0) {
-    generateQuestions(question.followups, markupArray)
+}
+
+export function generateFormTree(formBuilder, formTree) {
+  const children = formBuilder.children;
+  for (let i = 0; i < children.length; i++) {
+    if (
+      children[i].children.length > 0 &&
+      (getBoxType(children[i]) === "primary" ||
+        getBoxType(children[i]) === "followup")
+    ) {
+      const button = children[i].querySelector(".followup-question-button");
+      console.log("children[i]: ", children[i]);
+      console.log("button: ", button);
+      addQuestionToTree(button);
+      generateFormTree(children[i], formTree);
+    }
   }
-})
+}
+
+export function generateQuestions(formTree, markupArray) {
+  formTree.forEach((question, index) => {
+    if (question.nestingDegree !== undefined) {
+      generatePrimaryQuestion(question, index, markupArray);
+    } else {
+      generateFollowupQuestion(question, index, markupArray);
+    }
+    if (question.followups.length > 0) {
+      generateQuestions(question.followups, markupArray);
+    }
+  });
 }
 
 export function unhideFollowups(targetElement, formElements) {
-  const labelSibling = targetElement.previousElementSibling
-  const labelQuestion = labelSibling.textContent
-  const currentAnswer = targetElement.value
-  for (let i=0; i<formElements.length; i++) {
+  const labelSibling = targetElement.previousElementSibling;
+  const labelQuestion = labelSibling.textContent;
+  const currentAnswer = targetElement.value;
+  for (let i = 0; i < formElements.length; i++) {
     if (formElements[i].dataset.condition !== undefined) {
-      let {parentQuestion, conditionType, conditionValue} = JSON.parse(formElements[i].dataset.condition)
-      parentQuestion = parentQuestion.split('%^&').join(' ')
-      conditionValue = conditionValue.split('%^&').join(' ')
+      let { parentQuestion, conditionType, conditionValue } = JSON.parse(
+        formElements[i].dataset.condition
+      );
+      parentQuestion = parentQuestion.split("%^&").join(" ");
+      conditionValue = conditionValue.split("%^&").join(" ");
       if (parentQuestion === labelQuestion) {
         switch (conditionType) {
-          case '===':
-            if (conditionValue === currentAnswer) formElements[i].classList.remove('hidden')
-          break;
-          case 'greater':
-            if (conditionValue < currentAnswer) formElements[i].classList.remove('hidden')
-          break;
-          case 'smaller':
-            if (conditionValue > currentAnswer) formElements[i].classList.remove('hidden')
-          break;
+          case "===":
+            if (conditionValue === currentAnswer)
+              formElements[i].classList.remove("hidden");
+            break;
+          case "greater":
+            if (conditionValue < currentAnswer)
+              formElements[i].classList.remove("hidden");
+            break;
+          case "smaller":
+            if (conditionValue > currentAnswer)
+              formElements[i].classList.remove("hidden");
+            break;
         }
       }
     }
