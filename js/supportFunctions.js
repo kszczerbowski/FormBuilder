@@ -1,10 +1,13 @@
 import { generateFollowupQuestion, generatePrimaryQuestion } from "./markup.js";
 import { goToNestedArray } from "./navigateFunctions.js";
-import { handleSaveQuestion } from "./index.js";
-import { formTree } from "./index.js";
+import { formTree, generateButton } from "./index.js";
+import {
+  handleAddPrimaryQuestion,
+  handleAddFollowupQuestion,
+} from "./index.js";
 
-export function shouldAddPrimaryQuestion(event) {
-  return event.target.parentNode.classList.contains("form-builder");
+export function shouldAddPrimaryQuestion(targetElement) {
+  return targetElement.parentNode.classList.contains("form-builder");
 }
 
 export function isPrimaryQuestion(targetElement) {
@@ -190,4 +193,19 @@ export function unhideFollowups(targetElement, formElements) {
       }
     }
   }
+}
+
+export function restoreFormBuilderAndForm() {
+  const formTree = JSON.parse(localStorage.getItem("formTree"));
+  const primaryButton = document.querySelector(".primary-question-button");
+  formTree.forEach((question, index) => {
+    handleAddPrimaryQuestion(primaryButton, question);
+    const primaryBoxes = document.querySelectorAll(".primary-box");
+    primaryBoxes[index].querySelector("#question").value = question.question;
+    // mamy wygenerowane primaries
+    if (question.followups.length > 0) {
+    }
+  });
+
+  generateButton.classList.remove("hidden");
 }

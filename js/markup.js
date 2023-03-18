@@ -1,37 +1,45 @@
 import { shouldAddPrimaryQuestion } from "./supportFunctions.js";
 import { getQuestionType } from "./supportFunctions.js";
 
-export const primaryQuestionMarkup =
-  `
+export const primaryQuestionMarkup = (
+  predefinedObject
+) => {
+  const { type } = predefinedObject;
+  let optionValues;
+  switch (type) {
+    case "number":
+      optionValues = `<option value="text">Text</option>
+    <option value="number" selected>Number</option>
+    <option value="radio">Yes / No</option>`;
+      break;
+    case "radio":
+      optionValues = `<option value="text">Text</option>
+    <option value="number">Number</option>
+    <option value="radio" selected>Yes / No</option>`;
+      break;
+    default:
+      optionValues = `<option value="text">Text</option>
+    <option value="number">Number</option>
+    <option value="radio">Yes / No</option>`;
+  }
+  return (
+    `
 <label for="question">Question</label>
-<input name="question" id="question" type="text" />
+<input name="question" id="question" type="text"/>
 <label for="answer-type">Type</label>
-<select name="answer-type" id="answer-type">
-  <option value="text">Text</option>
-  <option value="number">Number</option>
-  <option value="radio">Yes / No</option>
-</select>
-<button type="button" class="save-question-button">Save question</button>
-<button type="button" class="followup-question-button"` +
-  //  disabled
-  `>Add follow-up question</button>
-`;
+<select name="answer-type" id="answer-type">` +
+    optionValues +
+    `</select>
+<button type="button" class="followup-question-button">Add follow-up question</button>
+`
+  );
+};
 
-export const followupQuestionMarkup =
-  `
-<label for="condition">Condition</label>
-<select name="condition-type" id="condition-type">
-  <option value="=">Equals</option>
-  <option value=">">Greater than</option>
-  <option value="<">Less than</option>
-</select>
-<input name="question" id="condition" type="text" />` + primaryQuestionMarkup;
-
-export function questionMarkup(event) {
-  if (shouldAddPrimaryQuestion(event)) {
-    return primaryQuestionMarkup;
+export function questionMarkup(targetElement, predefinedObject) {
+  if (shouldAddPrimaryQuestion(targetElement)) {
+    return primaryQuestionMarkup(predefinedObject);
   } else {
-    const questionType = getQuestionType(event.target);
+    const questionType = getQuestionType(targetElement);
     const numberOptions =
       questionType === "number"
         ? ` <option value="greater">Greater than</option>
@@ -53,7 +61,7 @@ export function questionMarkup(event) {
       numberOptions +
       `</select>` +
       conditionInput +
-      primaryQuestionMarkup
+      primaryQuestionMarkup(predefinedObject)
     );
   }
 }
