@@ -1,9 +1,15 @@
 import { shouldAddPrimaryQuestion } from "./supportFunctions.js";
 import { getQuestionType } from "./supportFunctions.js";
 
-export const primaryQuestionMarkup = (
-  predefinedObject
-) => {
+export const initialFormBuilderMarkup = `<button type="button" class="primary-question-button">
+Add question
+</button>
+<div class="primary-box"></div>
+<button type="button" class="generate-button hidden">
+Generate form
+</button>`;
+
+export const primaryQuestionMarkup = (predefinedObject) => {
   const { type } = predefinedObject;
   let optionValues;
   switch (type) {

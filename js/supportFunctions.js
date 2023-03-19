@@ -1,6 +1,12 @@
 import { generateFollowupQuestion, generatePrimaryQuestion } from "./markup.js";
 import { goToNestedArray } from "./navigateFunctions.js";
-import { formTree, generateButton, formBuilder } from "./index.js";
+import {
+  formTree,
+  generateButton,
+  clearButton,
+  formBuilder,
+  generateForm,
+} from "./index.js";
 import {
   handleAddPrimaryQuestion,
   handleAddFollowupQuestion,
@@ -141,8 +147,6 @@ export function generateFormTree(formBuilder, formTree) {
         getBoxType(children[i]) === "followup")
     ) {
       const button = children[i].querySelector(".followup-question-button");
-      console.log("children[i]: ", children[i]);
-      console.log("button: ", button);
       addQuestionToTree(button);
       generateFormTree(children[i], formTree);
     }
@@ -164,7 +168,13 @@ export function generateQuestions(formTree, markupArray) {
 
 export function unhideFollowups(targetElement, formElements) {
   const labelSibling = targetElement.previousElementSibling;
-  const labelQuestion = labelSibling.textContent;
+  let labelQuestion = labelSibling.textContent;
+  if (targetElement.value === "no") {
+    const labelWithQuestionForRadioValueNo =
+      targetElement.previousElementSibling.previousElementSibling
+        .previousElementSibling;
+    labelQuestion = labelWithQuestionForRadioValueNo.textContent;
+  }
   const currentAnswer = targetElement.value;
   for (let i = 0; i < formElements.length; i++) {
     if (formElements[i].dataset.condition !== undefined) {
@@ -247,15 +257,6 @@ function restoreFollowupQuestions(higherQuestion) {
     );
     handleAddFollowupQuestion(nestedButton, followup);
     fillInCurrentFollowup(followup, coordinates);
-    // const currentFollowup = goToCurrentFollowup(coordinates)
-    // const questionInput = currentFollowup.querySelector('#question')
-    // const conditionInput = currentFollowup.querySelector('input#condition')
-    // const conditionSelect = currentFollowup.querySelector('select#condition')
-    // const conditionTypeSelect = currentFollowup.querySelector('select#condition-type')
-    // conditionTypeSelect.value = followup.condition.conditionType
-    // if (conditionSelect === null) conditionInput.value = followup.condition.conditionValue.split('%^&').join(' ')
-    // if (conditionInput === null) conditionSelect.value = followup.condition.conditionValue
-    // questionInput.value = followup.question
     if (followup.followups.length > 0) restoreFollowupQuestions(followup);
   });
 }
@@ -268,11 +269,13 @@ export function restoreFormBuilderAndForm() {
     handleAddPrimaryQuestion(primaryButton, question);
     const primaryBoxes = document.querySelectorAll(".primary-box");
     primaryBoxes[index].querySelector("#question").value = question.question;
-    // mamy wygenerowane primaries
     if (question.followups.length > 0) {
       restoreFollowupQuestions(question);
     }
   });
-
+  formTree.splice(0, formTree.length);
+  generateFormTree(formBuilder, formTree);
+  generateForm();
   generateButton.classList.remove("hidden");
+  clearButton.classList.remove("hidden");
 }

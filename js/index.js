@@ -1,34 +1,23 @@
 import {
   questionMarkup,
-  generatePrimaryQuestion,
-  generateFollowupQuestion,
+  initialFormBuilderMarkup
 } from "./markup.js";
 import {
   goToFormBuildersLastDiv,
   goToLastSibling,
-  goToFollowupQuestionButton,
-  goToNestedArray,
 } from "./navigateFunctions.js";
 import {
-  isPrimaryQuestion,
-  getNestingDegree,
   prepareEmptyFollowupBox,
   prepareEmptyPrimaryBox,
-  getQuestionProperties,
-  blockQuestionButtons,
-  unblockQuestionButtons,
   generateFormTree,
-  getCoordinates,
   generateQuestions,
   unhideFollowups,
   restoreFormBuilderAndForm,
 } from "./supportFunctions.js";
 
 export const formBuilder = document.querySelector(".form-builder");
-const primaryQuestionButton = document.querySelector(
-  ".primary-question-button"
-);
-export const generateButton = document.querySelector(".generate-button");
+export let generateButton = document.querySelector(".generate-button");
+export const clearButton = document.querySelector(".clear-button");
 const targetForm = document.querySelector(".generated-form");
 let formElements = [];
 export const formTree = [];
@@ -46,7 +35,7 @@ export function handleAddPrimaryQuestion(targetElement, predefinedObject = { que
   );
   prepareEmptyFollowupBox(lastPrimaryQuestionDiv, "beforeend");
   prepareEmptyPrimaryBox(lastPrimaryQuestionDiv, "afterend");
-  // blockQuestionButtons();
+  generateButton.classList.remove('hidden')
 }
 
 export function handleAddFollowupQuestion(targetElement, predefinedObject = { question: "", type: "" }) {
@@ -54,18 +43,24 @@ export function handleAddFollowupQuestion(targetElement, predefinedObject = { qu
   followupQuestionDiv.insertAdjacentHTML("afterbegin", questionMarkup(targetElement, predefinedObject));
   prepareEmptyFollowupBox(followupQuestionDiv, "beforeend");
   prepareEmptyFollowupBox(followupQuestionDiv, "afterend");
-  // blockQuestionButtons();
 }
 
-function generateForm() {
+export function generateForm() {
   formMarkupArray.splice(0, formMarkupArray.length);
   generateQuestions(formTree, formMarkupArray);
   const formMarkup = formMarkupArray.join("");
   targetForm.innerHTML = formMarkup;
   formElements = targetForm.children;
   localStorage.setItem('formTree', JSON.stringify(formTree))
-  console.log("form tree: ", formTree);
-  console.log("children: ", formElements);
+}
+
+function clearFormAndBuilder() {
+  formBuilder.innerHTML = initialFormBuilderMarkup
+  targetForm.innerHTML = ``
+  localStorage.removeItem('formTree')
+  clearButton.classList.add('hidden')
+  generateButton = document.querySelector(".generate-button");
+  numberOfPrimaryQuestion = 0;
 }
 
 formBuilder.addEventListener("click", (event) => {
@@ -73,6 +68,7 @@ formBuilder.addEventListener("click", (event) => {
   switch (eventTargetClass) {
     case "primary-question-button":
       generateButton.classList.remove("hidden");
+      clearButton.classList.remove("hidden");
       handleAddPrimaryQuestion(event.target);
       break;
     case "followup-question-button":
@@ -93,55 +89,4 @@ targetForm.addEventListener("input", (event) => {
   unhideFollowups(event.target, formElements);
 });
 
-// const arrayOfObjects = [{
-//   question: question,
-//   type: type,
-//   followups: [],
-// },{
-//   question: question,
-//   type: type,
-//   followups: [
-//     {
-//       condition: condition,
-//       question: question,
-//       type: type,
-//       followups: [],
-//     },
-//     {
-//       condition: condition,
-//       question: question,
-//       type: type,
-//       followups: [],
-//     }
-//   ],
-// },{
-//   question: question,
-//   type: type,
-//   followups: [],
-// },{
-//   question: question,
-//   type: type,
-//   followups: [],
-// }]
-
-function isQuestionBox(targetElement) {
-  return (
-    targetElement.classList.contains("followup-box") ||
-    targetElement.classList.contains("primary-box")
-  );
-}
-
-function getQuestionBoxes(higherElement) {
-  const allChildren = higherElement.children;
-  const questionBoxes = [];
-  for (let i = 0; i < allChildren.length; i++) {
-    if (
-      allChildren[i].children.length > 0 && isQuestionBox(allChildren[i])
-    )
-      questionBoxes.push(allChildren[i]);
-  }
-  console.log('questionBoxes: ',questionBoxes)
-  return questionBoxes;
-}
-
-getQuestionBoxes(formBuilder)
+clearButton.addEventListener("click", clearFormAndBuilder);
