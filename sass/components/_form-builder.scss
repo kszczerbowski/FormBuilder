@@ -1,0 +1,76 @@
+%button {
+  transition-property: background-color;
+  transition-duration: 300ms;
+  margin: 0px auto;
+  font-size: 16px;
+  color: $color-button-font;
+  border: none;
+  letter-spacing: 0.05em;
+  border-radius: 20em;
+  cursor: pointer;
+}
+
+.primary-question-button,
+.generate-button {
+  @extend %button;
+  display: block;
+  padding: 0.5em 1.4em 0.5em 1.1em;
+  font-weight: 600;
+  background-color: $color-button-add-generate;
+  &:hover {
+    background-color: $color-button-add-generate-hover;
+  }
+  &:focus {
+    background-color: $color-button-add-generate-active;
+  }
+}
+
+.form-builder {
+  display: inline-block;
+  text-align: left;
+}
+
+.followup-question-button {
+  @extend %button;
+  padding: 0.3em 1.4em 0.3em 1.1em;
+  background-color: $color-button-followup;
+  font-size: 12px;
+  &:hover {
+    background-color: $color-button-followup-hover;
+  }
+  &:focus {
+    background-color: $color-button-followup-active;
+  }
+}
+
+.primary-question-button {
+  margin-top: 10px;
+}
+
+.generate-button {
+  display: block;
+  margin: 5px auto;
+}
+
+.primary-box,
+.followup-box {
+  line-height: 1.7;
+  position: relative;
+  padding-top: 13px;
+}
+
+.followup-box {
+  margin-left: 40px;
+}
+
+select {
+  border: none;
+  padding: 3px;
+  color: $color-select-font;
+  background-color: $color-select-background;
+  border-radius: 20px;
+  &:focus-visible {
+    border: none;
+    outline: none;
+  }
+}

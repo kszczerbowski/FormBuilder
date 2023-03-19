@@ -1,7 +1,4 @@
-import {
-  questionMarkup,
-  initialFormBuilderMarkup
-} from "./markup.js";
+import { questionMarkup, initialFormBuilderMarkup } from "./markup.js";
 import {
   goToFormBuildersLastDiv,
   goToLastSibling,
@@ -13,6 +10,7 @@ import {
   generateQuestions,
   unhideFollowups,
   restoreFormBuilderAndForm,
+  containsEmptyInputs,
 } from "./supportFunctions.js";
 
 export const formBuilder = document.querySelector(".form-builder");
@@ -25,8 +23,10 @@ const formMarkupArray = [];
 let numberOfPrimaryQuestion = 0;
 
 restoreFormBuilderAndForm();
-
-export function handleAddPrimaryQuestion(targetElement, predefinedObject = { question: "", type: "" }) {
+export function handleAddPrimaryQuestion(
+  targetElement,
+  predefinedObject = { question: "", type: "" }
+) {
   numberOfPrimaryQuestion++;
   const lastPrimaryQuestionDiv = goToFormBuildersLastDiv(targetElement);
   lastPrimaryQuestionDiv.insertAdjacentHTML(
@@ -35,12 +35,18 @@ export function handleAddPrimaryQuestion(targetElement, predefinedObject = { que
   );
   prepareEmptyFollowupBox(lastPrimaryQuestionDiv, "beforeend");
   prepareEmptyPrimaryBox(lastPrimaryQuestionDiv, "afterend");
-  generateButton.classList.remove('hidden')
+  generateButton.classList.remove("hidden");
 }
 
-export function handleAddFollowupQuestion(targetElement, predefinedObject = { question: "", type: "" }) {
+export function handleAddFollowupQuestion(
+  targetElement,
+  predefinedObject = { question: "", type: "" }
+) {
   const followupQuestionDiv = goToLastSibling(targetElement);
-  followupQuestionDiv.insertAdjacentHTML("afterbegin", questionMarkup(targetElement, predefinedObject));
+  followupQuestionDiv.insertAdjacentHTML(
+    "afterbegin",
+    questionMarkup(targetElement, predefinedObject)
+  );
   prepareEmptyFollowupBox(followupQuestionDiv, "beforeend");
   prepareEmptyFollowupBox(followupQuestionDiv, "afterend");
 }
@@ -51,16 +57,18 @@ export function generateForm() {
   const formMarkup = formMarkupArray.join("");
   targetForm.innerHTML = formMarkup;
   formElements = targetForm.children;
-  localStorage.setItem('formTree', JSON.stringify(formTree))
+  localStorage.setItem("formTree", JSON.stringify(formTree));
+  targetForm.classList.add("form-padding");
 }
 
 function clearFormAndBuilder() {
-  formBuilder.innerHTML = initialFormBuilderMarkup
-  targetForm.innerHTML = ``
-  localStorage.removeItem('formTree')
-  clearButton.classList.add('hidden')
+  formBuilder.innerHTML = initialFormBuilderMarkup;
+  targetForm.innerHTML = ``;
+  localStorage.removeItem("formTree");
+  clearButton.classList.add("hidden");
   generateButton = document.querySelector(".generate-button");
   numberOfPrimaryQuestion = 0;
+  targetForm.classList.remove("form-padding");
 }
 
 formBuilder.addEventListener("click", (event) => {
@@ -75,6 +83,12 @@ formBuilder.addEventListener("click", (event) => {
       handleAddFollowupQuestion(event.target);
       break;
     case "generate-button":
+      if (containsEmptyInputs()) {
+        Notiflix.Notify.failure(
+          "Please fill in all fields before generating the form!"
+        );
+        return;
+      }
       formTree.splice(0, formTree.length);
       generateFormTree(formBuilder, formTree);
       generateForm();
@@ -84,9 +98,19 @@ formBuilder.addEventListener("click", (event) => {
   }
 });
 
-targetForm.addEventListener("input", (event) => {
-  if (event.target.nodeName !== "INPUT") return;
-  unhideFollowups(event.target, formElements);
-});
+targetForm.addEventListener(
+  "input",
+  _.debounce(
+    (event) => {
+      if (event.target.nodeName !== "INPUT") return;
+      unhideFollowups(event.target, formElements);
+    },
+    500,
+    {
+      leading: false,
+      trailing: true,
+    }
+  )
+);
 
 clearButton.addEventListener("click", clearFormAndBuilder);

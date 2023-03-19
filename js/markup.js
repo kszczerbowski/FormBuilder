@@ -51,14 +51,21 @@ export function questionMarkup(targetElement, predefinedObject) {
         ? ` <option value="greater">Greater than</option>
     <option value="smaller">Less than</option>`
         : null;
-    const conditionInput =
-      questionType === "radio"
-        ? `<select name="condition" id="condition">
-    <option value="yes">Yes</option>
-    <option value="no">No</option>
-    </select>
-    `
-        : `<input name="question" id="condition" type="text" />`;
+    let conditionInput;
+    switch (questionType) {
+      case "radio":
+        conditionInput = `<select name="condition" id="condition">
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+        </select>
+        `;
+        break;
+      case "number":
+        conditionInput = `<input name="question" id="condition" type="number" />`;
+        break;
+      default:
+        conditionInput = `<input name="question" id="condition" type="text" />`;
+    }
     return (
       `
   <label for="condition">Condition</label>
@@ -78,12 +85,12 @@ export function generatePrimaryQuestion(primaryQuestion, index, markupArray) {
     labelMarkup = `<label class="form-question" for='primaryQuestion${
       index + 1
     }y'>${primaryQuestion.question}</label>
-      <input type="radio" name='primaryQuestion${
+      <input class='radio-input' type="radio" name='primaryQuestion${
         index + 1
       }' id='primaryQuestion${index + 1}y' value="yes">
       Yes
     <label for='primaryQuestion${index + 1}n'></label>
-      <input type="radio" name='primaryQuestion${
+      <input class='radio-input' type="radio" name='primaryQuestion${
         index + 1
       }' id='primaryQuestion${index + 1}n' value="no">
       No`;
@@ -94,7 +101,7 @@ export function generatePrimaryQuestion(primaryQuestion, index, markupArray) {
       primaryQuestion.question
     }</label><input class="form-input" name='primaryQuestion${
       index + 1
-    }' id='primaryQuestion${index + 1}' type=${primaryQuestion.type}/>`;
+    }' id='primaryQuestion${index + 1}' type=${primaryQuestion.type}>`;
   }
   markupArray.push(labelMarkup);
 }
@@ -109,7 +116,7 @@ export function generateFollowupQuestion(followupQuestion, index, markupArray) {
     }</label>
     <input data-condition=${JSON.stringify(
       followupQuestion.condition
-    )} class="hidden" type="radio" name='followupQuestion${
+    )} class="hidden radio-input" type="radio" name='followupQuestion${
       index + 1
     }' id='followupQuestion${index + 1}y' value="yes">
     <span data-condition=${JSON.stringify(
@@ -120,7 +127,7 @@ export function generateFollowupQuestion(followupQuestion, index, markupArray) {
   )} for='followupQuestion${index + 1}n'></label>
     <input data-condition=${JSON.stringify(
       followupQuestion.condition
-    )} class="hidden" type="radio" name='followupQuestion${
+    )} class="hidden radio-input" type="radio" name='followupQuestion${
       index + 1
     }' id='followupQuestion${index + 1}n' value="no">
     <span data-condition=${JSON.stringify(
@@ -135,7 +142,7 @@ export function generateFollowupQuestion(followupQuestion, index, markupArray) {
       followupQuestion.condition
     )} class="form-input hidden" name='followupQuestion${
       index + 1
-    }' id='followupQuestion${index + 1}' type=${followupQuestion.type}/>`;
+    }' id='followupQuestion${index + 1}' type=${followupQuestion.type}>`;
   }
   markupArray.push(labelMarkup);
 }

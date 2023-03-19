@@ -279,3 +279,12 @@ export function restoreFormBuilderAndForm() {
   generateButton.classList.remove("hidden");
   clearButton.classList.remove("hidden");
 }
+
+export function containsEmptyInputs() {
+  const inputFields = formBuilder.querySelectorAll("input");
+  for (let i = 0; i < inputFields.length; i++) {
+    if (inputFields[i].value === "") {
+      return true;
+    }
+  }
+}
