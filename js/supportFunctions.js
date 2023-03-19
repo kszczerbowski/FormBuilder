@@ -203,6 +203,36 @@ function getQuestionBoxes(higherElement) {
   return questionBoxes;
 }
 
+function goToCurrentFollowup(coordinates) {
+  const primaryBoxes = getQuestionBoxes(formBuilder);
+  let currentBox = primaryBoxes[coordinates[0]];
+  for (let i = 1; i < coordinates.length; i++) {
+    const lowerBoxes = getQuestionBoxes(currentBox);
+    currentBox = lowerBoxes[coordinates[i]];
+  }
+  const lowestRow = getQuestionBoxes(currentBox);
+  const currentFollowup = lowestRow[lowestRow.length - 1];
+  return currentFollowup;
+}
+
+function fillInCurrentFollowup(followup, coordinates) {
+  const currentFollowup = goToCurrentFollowup(coordinates);
+  const questionInput = currentFollowup.querySelector("#question");
+  const conditionInput = currentFollowup.querySelector("input#condition");
+  const conditionSelect = currentFollowup.querySelector("select#condition");
+  const conditionTypeSelect = currentFollowup.querySelector(
+    "select#condition-type"
+  );
+  conditionTypeSelect.value = followup.condition.conditionType;
+  if (conditionSelect === null)
+    conditionInput.value = followup.condition.conditionValue
+      .split("%^&")
+      .join(" ");
+  if (conditionInput === null)
+    conditionSelect.value = followup.condition.conditionValue;
+  questionInput.value = followup.question;
+}
+
 function restoreFollowupQuestions(higherQuestion) {
   const primaryBoxes = getQuestionBoxes(formBuilder);
   higherQuestion.followups.forEach((followup) => {
@@ -216,6 +246,16 @@ function restoreFollowupQuestions(higherQuestion) {
       ".followup-question-button"
     );
     handleAddFollowupQuestion(nestedButton, followup);
+    fillInCurrentFollowup(followup, coordinates);
+    // const currentFollowup = goToCurrentFollowup(coordinates)
+    // const questionInput = currentFollowup.querySelector('#question')
+    // const conditionInput = currentFollowup.querySelector('input#condition')
+    // const conditionSelect = currentFollowup.querySelector('select#condition')
+    // const conditionTypeSelect = currentFollowup.querySelector('select#condition-type')
+    // conditionTypeSelect.value = followup.condition.conditionType
+    // if (conditionSelect === null) conditionInput.value = followup.condition.conditionValue.split('%^&').join(' ')
+    // if (conditionInput === null) conditionSelect.value = followup.condition.conditionValue
+    // questionInput.value = followup.question
     if (followup.followups.length > 0) restoreFollowupQuestions(followup);
   });
 }
