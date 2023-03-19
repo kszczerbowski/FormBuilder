@@ -24,7 +24,7 @@ import {
   restoreFormBuilderAndForm,
 } from "./supportFunctions.js";
 
-const formBuilder = document.querySelector(".form-builder");
+export const formBuilder = document.querySelector(".form-builder");
 const primaryQuestionButton = document.querySelector(
   ".primary-question-button"
 );
@@ -123,3 +123,25 @@ targetForm.addEventListener("input", (event) => {
 //   type: type,
 //   followups: [],
 // }]
+
+function isQuestionBox(targetElement) {
+  return (
+    targetElement.classList.contains("followup-box") ||
+    targetElement.classList.contains("primary-box")
+  );
+}
+
+function getQuestionBoxes(higherElement) {
+  const allChildren = higherElement.children;
+  const questionBoxes = [];
+  for (let i = 0; i < allChildren.length; i++) {
+    if (
+      allChildren[i].children.length > 0 && isQuestionBox(allChildren[i])
+    )
+      questionBoxes.push(allChildren[i]);
+  }
+  console.log('questionBoxes: ',questionBoxes)
+  return questionBoxes;
+}
+
+getQuestionBoxes(formBuilder)

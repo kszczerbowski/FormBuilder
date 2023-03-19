@@ -1,6 +1,6 @@
 import { generateFollowupQuestion, generatePrimaryQuestion } from "./markup.js";
 import { goToNestedArray } from "./navigateFunctions.js";
-import { formTree, generateButton } from "./index.js";
+import { formTree, generateButton, formBuilder } from "./index.js";
 import {
   handleAddPrimaryQuestion,
   handleAddFollowupQuestion,
@@ -91,7 +91,6 @@ export function getCoordinates(targetElement) {
     !targetElement.parentNode.classList.contains("form-builder") ||
     targetElement.previousElementSibling !== null
   ) {
-    // console.log(targetElement.classList)
     if (targetElement.previousElementSibling !== null) {
       targetElement = targetElement.previousElementSibling;
       if (isQuestionBox(targetElement)) {
@@ -99,13 +98,11 @@ export function getCoordinates(targetElement) {
       }
     } else {
       coordinates.unshift(coordinate);
-      // console.log("coordinate: ", coordinate);
       targetElement = targetElement.parentNode;
       coordinate = 0;
     }
   }
   coordinates.unshift(coordinate);
-  // console.log('coordinates: ',coordinates)
   return coordinates;
 }
 
@@ -130,6 +127,7 @@ function addQuestionToTree(targetElement) {
       question: question,
       type: type,
       followups: [],
+      coordinates: coordinates,
     });
   }
 }
@@ -195,8 +193,36 @@ export function unhideFollowups(targetElement, formElements) {
   }
 }
 
+function getQuestionBoxes(higherElement) {
+  const allChildren = higherElement.children;
+  const questionBoxes = [];
+  for (let i = 0; i < allChildren.length; i++) {
+    if (allChildren[i].children.length > 0 && isQuestionBox(allChildren[i]))
+      questionBoxes.push(allChildren[i]);
+  }
+  return questionBoxes;
+}
+
+function restoreFollowupQuestions(higherQuestion) {
+  const primaryBoxes = getQuestionBoxes(formBuilder);
+  higherQuestion.followups.forEach((followup) => {
+    const coordinates = followup.coordinates;
+    let nestedButtonBox = primaryBoxes[coordinates[0]];
+    for (let i = 1; i < coordinates.length; i++) {
+      const nestedQuestionBoxes = getQuestionBoxes(nestedButtonBox);
+      nestedButtonBox = nestedQuestionBoxes[coordinates[i]];
+    }
+    const nestedButton = nestedButtonBox.querySelector(
+      ".followup-question-button"
+    );
+    handleAddFollowupQuestion(nestedButton, followup);
+    if (followup.followups.length > 0) restoreFollowupQuestions(followup);
+  });
+}
+
 export function restoreFormBuilderAndForm() {
   const formTree = JSON.parse(localStorage.getItem("formTree"));
+  if (formTree === null || formTree.length === 0) return;
   const primaryButton = document.querySelector(".primary-question-button");
   formTree.forEach((question, index) => {
     handleAddPrimaryQuestion(primaryButton, question);
@@ -204,6 +230,7 @@ export function restoreFormBuilderAndForm() {
     primaryBoxes[index].querySelector("#question").value = question.question;
     // mamy wygenerowane primaries
     if (question.followups.length > 0) {
+      restoreFollowupQuestions(question);
     }
   });
 
