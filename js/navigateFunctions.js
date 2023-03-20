@@ -25,7 +25,7 @@ export function goToNestedArray(coordinates, formTree) {
 
 export function goToQuestionBox(targetElement) {
   while (!isQuestionBox(targetElement)) {
-    targetElement = targetElement.parentNode
+    targetElement = targetElement.parentNode;
   }
   return targetElement;
 }

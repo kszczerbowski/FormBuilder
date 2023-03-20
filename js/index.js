@@ -12,8 +12,12 @@ import {
   unhideFollowups,
   restoreFormBuilderAndForm,
   containsEmptyInputs,
+  toggleFormBuilderVisibility,
 } from "./supportFunctions.js";
 
+let shouldShowFormBuilder = JSON.parse(
+  localStorage.getItem("shouldShowFormBuilder")
+);
 export const formBuilder = document.querySelector(".form-builder");
 export let generateButton = document.querySelector(".generate-button");
 export const clearButton = document.querySelector(".clear-button");
@@ -38,6 +42,8 @@ export function handleAddPrimaryQuestion(
   prepareEmptyPrimaryBox(lastPrimaryQuestionDiv, "afterend");
   generateButton.classList.remove("hidden");
 }
+
+if (shouldShowFormBuilder === false) toggleFormBuilderVisibility();
 
 export function handleAddFollowupQuestion(
   targetElement,
@@ -100,6 +106,9 @@ formBuilder.addEventListener("click", (event) => {
       formTree.splice(0, formTree.length);
       generateFormTree(formBuilder, formTree);
       generateForm();
+      Notiflix.Notify.info(
+        "If you want to hide the form builder, press ctrl+shift+H."
+      );
       break;
     default:
       return;
@@ -112,3 +121,23 @@ targetForm.addEventListener("input", (event) => {
 });
 
 clearButton.addEventListener("click", clearFormAndBuilder);
+
+document.addEventListener("keydown", (event) => {
+  if (
+    (event.ctrlKey || event.metaKey) &&
+    event.shiftKey &&
+    event.code === "KeyH"
+  ) {
+    toggleFormBuilderVisibility();
+    if (shouldShowFormBuilder === true) {
+      shouldShowFormBuilder = false;
+      localStorage.setItem("shouldShowFormBuilder", "false");
+      Notiflix.Notify.info(
+        "If you want to unhide the form builder, press ctrl+shift+H again."
+      );
+    } else {
+      shouldShowFormBuilder = true;
+      localStorage.setItem("shouldShowFormBuilder", "true");
+    }
+  }
+});

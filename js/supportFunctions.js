@@ -288,3 +288,8 @@ export function containsEmptyInputs() {
     }
   }
 }
+
+export function toggleFormBuilderVisibility() {
+  formBuilder.classList.toggle("hidden");
+  clearButton.classList.toggle("hidden");
+}
