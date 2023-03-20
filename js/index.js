@@ -2,6 +2,7 @@ import { questionMarkup, initialFormBuilderMarkup } from "./markup.js";
 import {
   goToFormBuildersLastDiv,
   goToLastSibling,
+  goToQuestionBox
 } from "./navigateFunctions.js";
 import {
   prepareEmptyFollowupBox,
@@ -73,6 +74,7 @@ function clearFormAndBuilder() {
 
 formBuilder.addEventListener("click", (event) => {
   const eventTargetClass = event.target.classList[0];
+  let questionBox;
   switch (eventTargetClass) {
     case "primary-question-button":
       generateButton.classList.remove("hidden");
@@ -82,6 +84,12 @@ formBuilder.addEventListener("click", (event) => {
     case "followup-question-button":
       handleAddFollowupQuestion(event.target);
       break;
+    case 'delete-question-button':
+    case 'delete-cross-icon':
+    case 'delete-path':
+      questionBox = goToQuestionBox(event.target)
+      questionBox.remove();
+    break;
     case "generate-button":
       if (containsEmptyInputs()) {
         Notiflix.Notify.failure(
@@ -94,6 +102,7 @@ formBuilder.addEventListener("click", (event) => {
       generateForm();
       break;
     default:
+      console.log('event.target: ',event.target)
       return;
   }
 });

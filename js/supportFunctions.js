@@ -82,7 +82,7 @@ export function getQuestionProperties(targetElement) {
   }
 }
 
-function isQuestionBox(targetElement) {
+export function isQuestionBox(targetElement) {
   return (
     targetElement.classList.contains("followup-box") ||
     targetElement.classList.contains("primary-box")

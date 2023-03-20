@@ -47,6 +47,29 @@
   margin-top: 10px;
 }
 
+.delete-question-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 1px 1px 3px $color-button-delete-shadow;
+  background: $color-button-delete;
+  transition: 200ms;
+  aspect-ratio: 1;
+  &:hover {
+    background: $color-button-delete-hover;
+  }
+  &:focus {
+    outline: none;
+  }
+}
+
+.delete-cross-icon {
+  fill: #FFFFFF;
+}
+
 .generate-button {
   display: block;
   margin: 5px auto;

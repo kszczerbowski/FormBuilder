@@ -1,3 +1,5 @@
+import { isQuestionBox } from "./supportFunctions.js";
+
 export function goToFormBuildersLastDiv(targetElement) {
   if (!targetElement.classList.contains("form-builder")) {
     return goToFormBuildersLastDiv(targetElement.parentElement);
@@ -19,4 +21,11 @@ export function goToNestedArray(coordinates, formTree) {
     nestedArray = nestedArray[coordinates[i]].followups;
   }
   return nestedArray;
+}
+
+export function goToQuestionBox(targetElement) {
+  while (!isQuestionBox(targetElement)) {
+    targetElement = targetElement.parentNode
+  }
+  return targetElement;
 }
