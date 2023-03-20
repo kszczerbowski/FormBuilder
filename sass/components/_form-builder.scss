@@ -1,13 +1,13 @@
-%button {
-  transition-property: background-color;
-  transition-duration: 300ms;
-  margin: 0px auto;
-  font-size: 16px;
-  color: $color-button-font;
-  border: none;
-  letter-spacing: 0.05em;
-  border-radius: 20em;
-  cursor: pointer;
+.question-div,
+.type-div,
+.condition-type-div,
+.buttons-div {
+  @extend %form-builder-div;
+}
+
+.condition-div {
+  display: inline-flex;
+  align-items: end;
 }
 
 .primary-question-button,
@@ -28,6 +28,10 @@
 .form-builder {
   display: inline-block;
   text-align: left;
+  &-input {
+    @extend %input;
+    height: fit-content;
+  }
 }
 
 .followup-question-button {
@@ -35,7 +39,6 @@
   padding: 0.3em 1.4em 0.3em 1.1em;
   background-color: $color-button-followup;
   font-size: 12px;
-  margin: 5px 0px;
   &:hover {
     background-color: $color-button-followup-hover;
   }
@@ -67,8 +70,15 @@
   }
 }
 
+.delete-question-button,
+.followup-question-button {
+  display: table-cell;
+  vertical-align: bottom;
+  margin: 3px;
+}
+
 .delete-cross-icon {
-  fill: #FFFFFF;
+  fill: #ffffff;
 }
 
 .generate-button {
@@ -79,8 +89,8 @@
 .primary-box,
 .followup-box {
   line-height: 1.7;
-  position: relative;
   padding-top: 13px;
+  display: table;
 }
 
 .followup-box {
@@ -89,7 +99,7 @@
 
 select {
   border: none;
-  padding: 3px;
+  padding: 4px 3px;
   color: $color-select-font;
   background-color: $color-select-background;
   border-radius: 20px;

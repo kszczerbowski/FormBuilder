@@ -2,7 +2,7 @@ import { questionMarkup, initialFormBuilderMarkup } from "./markup.js";
 import {
   goToFormBuildersLastDiv,
   goToLastSibling,
-  goToQuestionBox
+  goToQuestionBox,
 } from "./navigateFunctions.js";
 import {
   prepareEmptyFollowupBox,
@@ -84,12 +84,12 @@ formBuilder.addEventListener("click", (event) => {
     case "followup-question-button":
       handleAddFollowupQuestion(event.target);
       break;
-    case 'delete-question-button':
-    case 'delete-cross-icon':
-    case 'delete-path':
-      questionBox = goToQuestionBox(event.target)
+    case "delete-question-button":
+    case "delete-cross-icon":
+    case "delete-path":
+      questionBox = goToQuestionBox(event.target);
       questionBox.remove();
-    break;
+      break;
     case "generate-button":
       if (containsEmptyInputs()) {
         Notiflix.Notify.failure(
@@ -102,24 +102,13 @@ formBuilder.addEventListener("click", (event) => {
       generateForm();
       break;
     default:
-      console.log('event.target: ',event.target)
       return;
   }
 });
 
-targetForm.addEventListener(
-  "input",
-  _.debounce(
-    (event) => {
-      if (event.target.nodeName !== "INPUT") return;
-      unhideFollowups(event.target, formElements);
-    },
-    500,
-    {
-      leading: false,
-      trailing: true,
-    }
-  )
-);
+targetForm.addEventListener("input", (event) => {
+  if (event.target.nodeName !== "INPUT") return;
+  unhideFollowups(event.target, formElements);
+});
 
 clearButton.addEventListener("click", clearFormAndBuilder);

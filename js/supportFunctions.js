@@ -172,7 +172,7 @@ export function unhideFollowups(targetElement, formElements) {
   if (targetElement.value === "no") {
     const labelWithQuestionForRadioValueNo =
       targetElement.previousElementSibling.previousElementSibling
-        .previousElementSibling;
+        .previousElementSibling.previousElementSibling;
     labelQuestion = labelWithQuestionForRadioValueNo.textContent;
   }
   const currentAnswer = targetElement.value;

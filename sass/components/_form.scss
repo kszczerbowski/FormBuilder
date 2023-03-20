@@ -25,6 +25,7 @@
 }
 
 .form-input {
+  @extend %input;
   display: block;
   margin: 5px auto;
 }

@@ -30,12 +30,18 @@ export const primaryQuestionMarkup = (predefinedObject) => {
   }
   return (
     `
-<label for="question">Question</label>
-<input name="question" id="question" type="text"/>
-<label for="answer-type">Type</label>
-<select name="answer-type" id="answer-type">` +
+    
+    <div class="question-div">
+      <label for="question">Question</label>
+      <input class="form-builder-input" name="question" id="question" type="text"/>
+    </div>
+    <div class="type-div">
+      <label for="answer-type">Type</label>
+      <select name="answer-type" id="answer-type">` +
     optionValues +
     `</select>
+    </div>
+
     <button type="button" class="delete-question-button">
     <span>
       <svg class="delete-cross-icon"
@@ -73,19 +79,24 @@ export function questionMarkup(targetElement, predefinedObject) {
         `;
         break;
       case "number":
-        conditionInput = `<input name="question" id="condition" type="number" />`;
+        conditionInput = `<input class="form-builder-input" name="question" id="condition" type="number" />`;
         break;
       default:
-        conditionInput = `<input name="question" id="condition" type="text" />`;
+        conditionInput = `<input class="form-builder-input" name="question" id="condition" type="text" />`;
     }
     return (
       `
-  <label for="condition">Condition</label>
-  <select name="condition-type" id="condition-type">
-    <option value="===">Equals</option>` +
+  <div class="condition-div">
+    <div class="condition-type-div">
+    <label for="condition">Condition</label>
+    <select name="condition-type" id="condition-type">
+      <option value="===">Equals</option>` +
       numberOptions +
-      `</select>` +
+      `</select>
+    </div>` +
       conditionInput +
+      `
+  </div>` +
       primaryQuestionMarkup(predefinedObject)
     );
   }
@@ -100,12 +111,12 @@ export function generatePrimaryQuestion(primaryQuestion, index, markupArray) {
       <input class='radio-input' type="radio" name='primaryQuestion${
         index + 1
       }' id='primaryQuestion${index + 1}y' value="yes">
-      Yes
+      <span>Yes</span>
     <label for='primaryQuestion${index + 1}n'></label>
       <input class='radio-input' type="radio" name='primaryQuestion${
         index + 1
       }' id='primaryQuestion${index + 1}n' value="no">
-      No`;
+      <span>No</span>`;
   } else {
     labelMarkup = `<label for="primaryQuestion${
       index + 1
