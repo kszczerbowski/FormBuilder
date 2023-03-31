@@ -89,7 +89,7 @@ export function isQuestionBox(targetElement) {
   );
 }
 
-export function getCoordinates(targetElement) {
+function getCoordinates(targetElement) {
   targetElement = targetElement.parentNode.parentNode;
   const coordinates = [];
   let coordinate = 0;
@@ -108,7 +108,7 @@ export function getCoordinates(targetElement) {
       coordinate = 0;
     }
   }
-  coordinates.unshift(coordinate);
+  coordinates.unshift(coordinate);addQuest
   return coordinates;
 }
 

@@ -1,7 +1,5 @@
 Krzysztof Szczerbowski - FormBuilder project
 
-This is a simple form builder which I've created as a recruitment task for the position of Intern Frontend Developer at Profil Software.
-
 The form builder allows the user to generate a form with nested questions (questions which appear only if a condition regarding the previous question is met). Ways in which you can create these follow-up questions corresond strictly with type of 'parent' questions.
 
 There is a little validation which doesn't allow you to create the form if you've left any field empty - you'll get a Notiflix warning notification about this.

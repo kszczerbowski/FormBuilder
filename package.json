@@ -2,5 +2,16 @@
   "dependencies": {
     "lodash": "^4.17.21",
     "notiflix": "^3.2.6"
-  }
+  },
+  "name": "formbuilder",
+  "description": "Krzysztof Szczerbowski - FormBuilder project",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
