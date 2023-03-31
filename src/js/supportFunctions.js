@@ -90,7 +90,7 @@ export function isQuestionBox(targetElement) {
 }
 
 function getCoordinates(targetElement) {
-  targetElement = targetElement.parentNode.parentNode;
+  targetElement = targetElement.parentNode;
   const coordinates = [];
   let coordinate = 0;
   while (
@@ -108,7 +108,7 @@ function getCoordinates(targetElement) {
       coordinate = 0;
     }
   }
-  coordinates.unshift(coordinate);addQuest
+  coordinates.unshift(coordinate);
   return coordinates;
 }
 
@@ -246,9 +246,10 @@ function fillInCurrentFollowup(followup, coordinates) {
 function restoreFollowupQuestions(higherQuestion) {
   const primaryBoxes = getQuestionBoxes(formBuilder);
   higherQuestion.followups.forEach((followup) => {
-    const coordinates = followup.coordinates;
+    const originalCoordinates = followup.coordinates;
+    const coordinates = [...originalCoordinates].slice(0,originalCoordinates.length-1);
     let nestedButtonBox = primaryBoxes[coordinates[0]];
-    for (let i = 1; i < coordinates.length; i++) {
+    for (let i = 1; i < coordinates.length-1; i++) {
       const nestedQuestionBoxes = getQuestionBoxes(nestedButtonBox);
       nestedButtonBox = nestedQuestionBoxes[coordinates[i]];
     }

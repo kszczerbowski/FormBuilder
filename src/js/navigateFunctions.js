@@ -17,7 +17,7 @@ export function goToFollowupQuestionButton(targetElement) {
 
 export function goToNestedArray(coordinates, formTree) {
   let nestedArray = formTree[coordinates[0]].followups;
-  for (let i = 1; i < coordinates.length; i++) {
+  for (let i = 1; i < coordinates.length-1; i++) {
     nestedArray = nestedArray[coordinates[i]].followups;
   }
   return nestedArray;
