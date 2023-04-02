@@ -13,6 +13,7 @@ import {
   restoreFormBuilderAndForm,
   containsEmptyInputs,
   toggleFormBuilderVisibility,
+  regenerateFollowups,
 } from "./supportFunctions.js";
 
 let shouldShowFormBuilder = JSON.parse(
@@ -112,6 +113,15 @@ formBuilder.addEventListener("click", (event) => {
       break;
     default:
       return;
+  }
+});
+
+formBuilder.addEventListener("input", (event) => {
+  const eventTargetID = event.target.id;
+  if (eventTargetID === "answer-type") {
+    regenerateFollowups(event.target);
+  } else {
+    return;
   }
 });
 

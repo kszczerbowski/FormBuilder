@@ -1,5 +1,9 @@
-import { generateFollowupQuestion, generatePrimaryQuestion } from "./markup.js";
-import { goToNestedArray } from "./navigateFunctions.js";
+import {
+  generateFollowupQuestion,
+  generatePrimaryQuestion,
+  conditionDivMarkup,
+} from "./markup.js";
+import { goToNestedArray, goToQuestionBox } from "./navigateFunctions.js";
 import {
   formTree,
   generateButton,
@@ -25,8 +29,8 @@ function getBoxType(targetElement) {
   if (targetElement.classList.contains("followup-box")) return "followup";
 }
 
-export function getQuestionType(targetELement) {
-  const parent = targetELement.parentNode;
+export function getQuestionType(targetElement) {
+  const parent = targetElement.parentNode;
   const type = parent.querySelector("#answer-type").value;
   return type;
 }
@@ -45,11 +49,11 @@ export function unblockQuestionButtons() {
   questionButtons.forEach((button) => button.removeAttribute("disabled"));
 }
 
-export function getNestingDegree(targetELement) {
+export function getNestingDegree(targetElement) {
   let nestingDegree = 0;
-  while (!targetELement.parentNode.classList.contains("primary-box")) {
+  while (!targetElement.parentNode.classList.contains("primary-box")) {
     nestingDegree++;
-    targetELement = targetELement.parentNode;
+    targetElement = targetElement.parentNode;
   }
   return nestingDegree;
 }
@@ -125,8 +129,8 @@ function addQuestionToTree(targetElement) {
     const [condition, question, type] = getQuestionProperties(targetElement);
     const coordinates = getCoordinates(targetElement);
     const primaryQuestion = formTree[coordinates[0]];
-    if (coordinates.length > primaryQuestion.nestingDegree)
-      primaryQuestion.nestingDegree = coordinates.length;
+    if (coordinates.length - 1 > primaryQuestion.nestingDegree)
+      primaryQuestion.nestingDegree = coordinates.length - 1;
     const nestedArray = goToNestedArray(coordinates, formTree);
     nestedArray.push({
       condition: condition,
@@ -213,10 +217,20 @@ function getQuestionBoxes(higherElement) {
   return questionBoxes;
 }
 
+function getFollowupQuestionButton(higherElement) {
+  const allChildren = higherElement.children;
+  let followupQuestionButton;
+  for (let i = 0; i < allChildren.length; i++) {
+    if (allChildren[i].classList.contains("followup-question-button"))
+      followupQuestionButton = allChildren[i];
+  }
+  return followupQuestionButton;
+}
+
 function goToCurrentFollowup(coordinates) {
   const primaryBoxes = getQuestionBoxes(formBuilder);
   let currentBox = primaryBoxes[coordinates[0]];
-  for (let i = 1; i < coordinates.length; i++) {
+  for (let i = 1; i < coordinates.length - 1; i++) {
     const lowerBoxes = getQuestionBoxes(currentBox);
     currentBox = lowerBoxes[coordinates[i]];
   }
@@ -246,10 +260,9 @@ function fillInCurrentFollowup(followup, coordinates) {
 function restoreFollowupQuestions(higherQuestion) {
   const primaryBoxes = getQuestionBoxes(formBuilder);
   higherQuestion.followups.forEach((followup) => {
-    const originalCoordinates = followup.coordinates;
-    const coordinates = [...originalCoordinates].slice(0,originalCoordinates.length-1);
+    const coordinates = followup.coordinates;
     let nestedButtonBox = primaryBoxes[coordinates[0]];
-    for (let i = 1; i < coordinates.length-1; i++) {
+    for (let i = 1; i < coordinates.length - 1; i++) {
       const nestedQuestionBoxes = getQuestionBoxes(nestedButtonBox);
       nestedButtonBox = nestedQuestionBoxes[coordinates[i]];
     }
@@ -293,4 +306,17 @@ export function containsEmptyInputs() {
 export function toggleFormBuilderVisibility() {
   formBuilder.classList.toggle("hidden");
   clearButton.classList.toggle("hidden");
+}
+
+export function regenerateFollowups(targetElement) {
+  const parentQuestionBox = goToQuestionBox(targetElement);
+  const subQuestionBoxes = getQuestionBoxes(parentQuestionBox);
+  const followupQuestionButton = getFollowupQuestionButton(parentQuestionBox);
+  if (subQuestionBoxes.length === 0) return;
+  for (let i = 0; i < subQuestionBoxes.length; i++) {
+    const divMarkup = conditionDivMarkup(followupQuestionButton);
+    const oldConditionDiv = subQuestionBoxes[i].querySelector(".condition-div");
+    oldConditionDiv.remove();
+    subQuestionBoxes[i].insertAdjacentHTML("afterbegin", divMarkup);
+  }
 }
