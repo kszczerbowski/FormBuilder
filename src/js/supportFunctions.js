@@ -170,7 +170,7 @@ export function generateQuestions(formTree, markupArray) {
   });
 }
 
-export function unhideFollowups(targetElement, formElements) {
+export function unhideFollowups(targetElement, formElements, shouldHideDescendants = false) {
   const labelSibling = targetElement.previousElementSibling;
   let labelQuestion = labelSibling.textContent;
   if (targetElement.value === "no") {
@@ -179,30 +179,63 @@ export function unhideFollowups(targetElement, formElements) {
         .previousElementSibling.previousElementSibling;
     labelQuestion = labelWithQuestionForRadioValueNo.textContent;
   }
-  const currentAnswer = targetElement.value;
-  for (let i = 0; i < formElements.length; i++) {
-    if (formElements[i].dataset.condition !== undefined) {
+  let currentAnswer = targetElement.value;
+  if ((shouldHideDescendants) || (currentAnswer === 'no' && targetElement.checked === false)) currentAnswer = '';
+  const coordinatesString = targetElement.getAttribute('data-coordinates')
+  const coordinatesArray = coordinatesString.split(',')
+  const detectSubQuestions = () => {
+    const subQuestions = [];
+    for (let i = 0; i < formElements.length; i++) {
+      if (formElements[i].getAttribute('data-coordinates') === null) continue
+      const subCoordinatesString = formElements[i].getAttribute('data-coordinates')
+      const subCoordinatesArray = subCoordinatesString.split(',')
+      if ((subCoordinatesArray.length === coordinatesArray.length+1) && (subCoordinatesString.startsWith(coordinatesString))) subQuestions.push(formElements[i])
+    }
+    return subQuestions;
+  }
+  const subQuestions = detectSubQuestions();
+  for (let i = 0; i < subQuestions.length; i++) {
+    if (subQuestions[i].dataset.condition !== undefined) {
       let { parentQuestion, conditionType, conditionValue } = JSON.parse(
-        formElements[i].dataset.condition
+        subQuestions[i].dataset.condition
       );
       parentQuestion = parentQuestion.split("%^&").join(" ");
       conditionValue = conditionValue.split("%^&").join(" ");
-      if (parentQuestion === labelQuestion) {
+      if ((parentQuestion === labelQuestion) 
+      ) {
         switch (conditionType) {
           case "===":
-            if (conditionValue === currentAnswer)
-              formElements[i].classList.remove("hidden");
+            if (conditionValue === currentAnswer) {
+              subQuestions[i].classList.remove("hidden");
+              shouldHideDescendants = false;
+            } else {
+              subQuestions[i].classList.add("hidden");
+              shouldHideDescendants = true;
+            }
             break;
           case "greater":
-            if (conditionValue < currentAnswer)
-              formElements[i].classList.remove("hidden");
+            if (conditionValue < currentAnswer) {
+              subQuestions[i].classList.remove("hidden");
+              shouldHideDescendants = false;
+            } else {
+              subQuestions[i].classList.add("hidden");
+              shouldHideDescendants = true;
+            }
             break;
           case "smaller":
-            if (conditionValue > currentAnswer)
-              formElements[i].classList.remove("hidden");
+            if (conditionValue > currentAnswer && currentAnswer !=='') {
+              subQuestions[i].classList.remove("hidden");
+              shouldHideDescendants = false;
+            } else {
+              subQuestions[i].classList.add("hidden");
+              shouldHideDescendants = true;
+            }
             break;
         }
       }
+      const siblingYesInput = subQuestions.find(element => element.value === 'yes' && element.nodeName === 'INPUT');
+      const hasCheckedYesSibling = siblingYesInput !== undefined && siblingYesInput.checked && subQuestions[i].value !== 'yes';
+      if ((subQuestions[i].nodeName === "INPUT") && (!hasCheckedYesSibling)) unhideFollowups(subQuestions[i],formElements, shouldHideDescendants);
     }
   }
 }
@@ -221,8 +254,7 @@ function getFollowupQuestionButton(higherElement) {
   const allChildren = higherElement.children;
   let followupQuestionButton;
   for (let i = 0; i < allChildren.length; i++) {
-    if (allChildren[i].classList.contains("followup-question-button"))
-      followupQuestionButton = allChildren[i];
+    if (allChildren[i].classList.contains('followup-question-button')) followupQuestionButton = allChildren[i];
   }
   return followupQuestionButton;
 }
@@ -311,7 +343,7 @@ export function toggleFormBuilderVisibility() {
 export function regenerateFollowups(targetElement) {
   const parentQuestionBox = goToQuestionBox(targetElement);
   const subQuestionBoxes = getQuestionBoxes(parentQuestionBox);
-  const followupQuestionButton = getFollowupQuestionButton(parentQuestionBox);
+  const followupQuestionButton = getFollowupQuestionButton(parentQuestionBox)
   if (subQuestionBoxes.length === 0) return;
   for (let i = 0; i < subQuestionBoxes.length; i++) {
     const divMarkup = conditionDivMarkup(followupQuestionButton);
